@@ -112,7 +112,7 @@ export async function cmdConnect(): Promise<void> {
   if (devices.length > 0) {
     deviceName = await vscode.window.showQuickPick(devices, {
       placeHolder: 'Select a device to connect to',
-      title: 'Kathara: Connect to Device',
+      title: 'Connect to Device',
     });
   } else {
     deviceName = await vscode.window.showInputBox({
@@ -139,7 +139,7 @@ export async function cmdVstart(): Promise<void> {
   if (devices.length > 0) {
     deviceName = await vscode.window.showQuickPick(devices, {
       placeHolder: 'Select a device to start',
-      title: 'Kathara: Start Device',
+      title: 'Start Device',
     });
   } else {
     deviceName = await vscode.window.showInputBox({

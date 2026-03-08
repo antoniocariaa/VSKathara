@@ -1,0 +1,10 @@
+{
+  // Recommended extensions for VSKathara contributors
+  "recommendations": [
+    // Linting & formatting
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    // Helps inspect TextMate grammar token scopes (useful for grammar development)
+    "draivin.hscopes"
+  ]
+}

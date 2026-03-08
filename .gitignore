@@ -4,3 +4,6 @@ out/
 *.vsix
 .vscode-test/
 *.js.map
+
+# Commit launch.json, tasks.json, extensions.json — but not personal settings
+.vscode/settings.json

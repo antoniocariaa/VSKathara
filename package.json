@@ -1,0 +1,206 @@
+{
+  "name": "vskathara",
+  "displayName": "VSKathara",
+  "description": "Kathara network lab tooling: syntax highlighting, autocompletion, linting, commands, and topology view.",
+  "version": "0.1.0",
+  "publisher": "vskathara",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "keywords": [
+    "kathara",
+    "netkit",
+    "network",
+    "lab",
+    "emulation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KatharaFramework/VSKathara"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:lab-conf",
+    "onLanguage:lab-dep",
+    "onLanguage:lab-ext",
+    "onLanguage:shellscript",
+    "workspaceContains:**/lab.conf"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "lab-conf",
+        "aliases": [
+          "Kathara Lab Config",
+          "lab.conf"
+        ],
+        "filenames": [
+          "lab.conf"
+        ],
+        "configuration": "./language-configuration/lab-conf-language-configuration.json"
+      },
+      {
+        "id": "lab-dep",
+        "aliases": [
+          "Kathara Lab Dependencies",
+          "lab.dep"
+        ],
+        "filenames": [
+          "lab.dep"
+        ],
+        "configuration": "./language-configuration/lab-dep-language-configuration.json"
+      },
+      {
+        "id": "lab-ext",
+        "aliases": [
+          "Kathara External Networks",
+          "lab.ext"
+        ],
+        "filenames": [
+          "lab.ext"
+        ],
+        "configuration": "./language-configuration/lab-ext-language-configuration.json"
+      },
+      {
+        "id": "shellscript",
+        "extensions": [
+          ".startup"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "lab-conf",
+        "scopeName": "source.lab-conf",
+        "path": "./syntaxes/lab-conf.tmLanguage.json"
+      },
+      {
+        "language": "lab-dep",
+        "scopeName": "source.lab-dep",
+        "path": "./syntaxes/lab-dep.tmLanguage.json"
+      },
+      {
+        "language": "lab-ext",
+        "scopeName": "source.lab-ext",
+        "path": "./syntaxes/lab-ext.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "lab-conf",
+        "path": "./snippets/lab-conf.snippets.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "kathara.lstart",
+        "title": "Kathara: Start Lab",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.lclean",
+        "title": "Kathara: Stop Lab",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.lrestart",
+        "title": "Kathara: Restart Lab",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.linfo",
+        "title": "Kathara: Lab Info",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.connect",
+        "title": "Kathara: Connect to Device",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.vstart",
+        "title": "Kathara: Start Device",
+        "category": "Kathara"
+      },
+      {
+        "command": "kathara.showTopology",
+        "title": "Kathara: Show Topology",
+        "category": "Kathara",
+        "icon": "$(type-hierarchy)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceFilename == 'lab.conf'",
+          "command": "kathara.showTopology",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceFilename == 'lab.conf'",
+          "command": "kathara.lstart",
+          "group": "kathara@1"
+        },
+        {
+          "when": "resourceFilename == 'lab.conf'",
+          "command": "kathara.lclean",
+          "group": "kathara@2"
+        },
+        {
+          "when": "resourceFilename == 'lab.conf'",
+          "command": "kathara.showTopology",
+          "group": "kathara@3"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "kathara.lstart"
+        },
+        {
+          "command": "kathara.lclean"
+        },
+        {
+          "command": "kathara.lrestart"
+        },
+        {
+          "command": "kathara.linfo"
+        },
+        {
+          "command": "kathara.connect"
+        },
+        {
+          "command": "kathara.vstart"
+        },
+        {
+          "command": "kathara.showTopology"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "build:dev": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "compile": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src --ext .ts",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "esbuild": "^0.27.3",
+    "eslint": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

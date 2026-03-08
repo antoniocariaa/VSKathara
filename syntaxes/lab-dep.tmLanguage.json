@@ -1,0 +1,31 @@
+{
+  "name": "Kathara Lab Dependencies",
+  "scopeName": "source.lab-dep",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#dependency-rule" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.lab-dep",
+      "match": "#.*$"
+    },
+    "dependency-rule": {
+      "name": "meta.dependency.lab-dep",
+      "match": "^([A-Za-z_][A-Za-z0-9_-]*)\\s*(:)\\s*(.*)$",
+      "captures": {
+        "1": { "name": "entity.name.device.primary.lab-dep" },
+        "2": { "name": "punctuation.separator.colon.lab-dep" },
+        "3": {
+          "patterns": [
+            { "include": "#device-list" }
+          ]
+        }
+      }
+    },
+    "device-list": {
+      "match": "[A-Za-z_][A-Za-z0-9_-]*",
+      "name": "entity.name.device.dependency.lab-dep"
+    }
+  }
+}

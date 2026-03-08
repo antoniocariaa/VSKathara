@@ -1,0 +1,89 @@
+{
+  "name": "Kathara Lab Config",
+  "scopeName": "source.lab-conf",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#meta-assignment" },
+    { "include": "#interface-assignment" },
+    { "include": "#option-assignment" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.lab-conf",
+      "match": "#.*$"
+    },
+    "meta-assignment": {
+      "name": "meta.assignment.lab-conf",
+      "match": "^(LAB_NAME|LAB_DESCRIPTION|LAB_VERSION|LAB_AUTHOR|LAB_EMAIL|LAB_WEB)\\s*(=)\\s*(.*)$",
+      "captures": {
+        "1": { "name": "keyword.other.meta.lab-conf" },
+        "2": { "name": "keyword.operator.assignment.lab-conf" },
+        "3": { "name": "string.unquoted.meta-value.lab-conf",
+          "patterns": [{ "include": "#quoted-string" }]
+        }
+      }
+    },
+    "interface-assignment": {
+      "name": "meta.interface.lab-conf",
+      "match": "^([A-Za-z_][A-Za-z0-9_-]*)\\[([0-9]+)\\]\\s*(=)\\s*(.*)$",
+      "captures": {
+        "1": { "name": "entity.name.device.lab-conf" },
+        "2": { "name": "constant.numeric.interface-index.lab-conf" },
+        "3": { "name": "keyword.operator.assignment.lab-conf" },
+        "4": {
+          "name": "string.unquoted.interface-value.lab-conf",
+          "patterns": [
+            { "include": "#collision-domain-with-mac" },
+            { "include": "#quoted-string" }
+          ]
+        }
+      }
+    },
+    "option-assignment": {
+      "name": "meta.option.lab-conf",
+      "match": "^([A-Za-z_][A-Za-z0-9_-]*)\\[([A-Za-z_][A-Za-z0-9_]*)\\]\\s*(=)\\s*(.*)$",
+      "captures": {
+        "1": { "name": "entity.name.device.lab-conf" },
+        "2": { "name": "support.type.option-name.lab-conf" },
+        "3": { "name": "keyword.operator.assignment.lab-conf" },
+        "4": {
+          "patterns": [
+            { "include": "#boolean-value" },
+            { "include": "#quoted-string" },
+            { "include": "#unquoted-value" }
+          ]
+        }
+      }
+    },
+    "collision-domain-with-mac": {
+      "match": "\"?([A-Za-z0-9_-]+)(/([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}))?\"?",
+      "captures": {
+        "1": { "name": "variable.other.collision-domain.lab-conf" },
+        "3": { "name": "constant.other.mac-address.lab-conf" }
+      }
+    },
+    "boolean-value": {
+      "match": "\\b(true|false)\\b",
+      "name": "constant.language.boolean.lab-conf"
+    },
+    "quoted-string": {
+      "name": "string.quoted.double.lab-conf",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.other.mac-address.lab-conf",
+          "match": "/[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}"
+        },
+        {
+          "name": "constant.numeric.port.lab-conf",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "unquoted-value": {
+      "match": "[^\\s#][^#]*",
+      "name": "string.unquoted.value.lab-conf"
+    }
+  }
+}

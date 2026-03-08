@@ -1,0 +1,23 @@
+{
+  "name": "Kathara External Networks",
+  "scopeName": "source.lab-ext",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#ext-mapping" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.lab-ext",
+      "match": "#.*$"
+    },
+    "ext-mapping": {
+      "name": "meta.ext-mapping.lab-ext",
+      "match": "^([A-Za-z0-9_-]+)\\s+([A-Za-z0-9_-]+)(?:\\.(\\d+))?\\s*$",
+      "captures": {
+        "1": { "name": "variable.other.collision-domain.lab-ext" },
+        "2": { "name": "entity.name.interface.lab-ext" },
+        "3": { "name": "constant.numeric.vlan-id.lab-ext" }
+      }
+    }
+  }
+}

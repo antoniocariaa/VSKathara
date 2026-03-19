@@ -19,7 +19,10 @@
         "1": { "name": "keyword.other.meta.lab-conf" },
         "2": { "name": "keyword.operator.assignment.lab-conf" },
         "3": { "name": "string.unquoted.meta-value.lab-conf",
-          "patterns": [{ "include": "#quoted-string" }]
+          "patterns": [
+            { "include": "#quoted-string" },
+            { "include": "#comment" }
+          ]
         }
       }
     },
@@ -34,7 +37,8 @@
           "name": "string.unquoted.interface-value.lab-conf",
           "patterns": [
             { "include": "#collision-domain-with-mac" },
-            { "include": "#quoted-string" }
+            { "include": "#quoted-string" },
+            { "include": "#comment" }
           ]
         }
       }
@@ -50,7 +54,8 @@
           "patterns": [
             { "include": "#boolean-value" },
             { "include": "#quoted-string" },
-            { "include": "#unquoted-value" }
+            { "include": "#unquoted-value" },
+            { "include": "#comment" }
           ]
         }
       }

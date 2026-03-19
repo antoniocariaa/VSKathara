@@ -18,7 +18,8 @@
         "2": { "name": "punctuation.separator.colon.lab-dep" },
         "3": {
           "patterns": [
-            { "include": "#device-list" }
+            { "include": "#device-list" },
+            { "include": "#comment" }
           ]
         }
       }

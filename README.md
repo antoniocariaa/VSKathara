@@ -46,7 +46,13 @@ Errors and warnings are shown inline as you type:
 
 ### Topology View
 Run **Kathara: Show Topology** (or click the icon in the `lab.conf` editor title bar) to open an interactive network graph:
-- Devices shown as **rectangles**, collision domains as **ellipses**
+- Device shapes are inferred from host name prefixes (Packet Tracer-inspired, simplified):
+	- `pc*` → **PC** shape (monitor)
+	- `lt*` → **Laptop** shape
+	- `r*` → **Router** shape
+	- `server*` → **Server** shape
+	- other names → generic device shape
+- Collision domains are shown as **ellipses**
 - Force-directed layout, auto-fits to window on load
 - **Scroll** to zoom · **Drag canvas** to pan · **Drag nodes** to reposition · **Double-click** canvas to reset view
 - Colors adapt automatically to any VS Code theme
@@ -151,8 +157,6 @@ B enp9s0.20
 ```
 
 #### ToDO:
-- syntax highlight fix on inline comments
-- different shapes for router, host and collision doman nodes in topology view
 - show bridged devices in topology view (maybe as clouds around the host node?)
 - more complete autocompletion (options inside `lab.ext` and `lab.dep`, metadata keys, etc.)
 - hover docs for `lab.ext` and `lab.dep` options

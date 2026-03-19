@@ -3,18 +3,35 @@ import * as path from 'path';
 import { parseLabConf, type LabConfDocument } from '../parser/labConfParser';
 
 interface TopologyData {
-  devices: Array<{ id: string; label: string }>;
+  devices: Array<{ id: string; label: string; kind: 'pc' | 'laptop' | 'router' | 'server' | 'device' }>;
   domains: Array<{ id: string; label: string }>;
   edges: Array<{ from: string; to: string; label: string }>;
 }
 
+function getDeviceKind(deviceName: string): 'pc' | 'laptop' | 'router' | 'server' | 'device' {
+  const lower = deviceName.toLowerCase();
+  if (lower.startsWith('pc')) {
+    return 'pc';
+  }
+  if (lower.startsWith('lt')) {
+    return 'laptop';
+  }
+  if (lower.startsWith('r')) {
+    return 'router';
+  }
+  if (lower.startsWith('server')) {
+    return 'server';
+  }
+  return 'device';
+}
+
 function buildTopology(parsed: LabConfDocument): TopologyData {
-  const devices: Array<{ id: string; label: string }> = [];
+  const devices: Array<{ id: string; label: string; kind: 'pc' | 'laptop' | 'router' | 'server' | 'device' }> = [];
   const domainsMap = new Map<string, { id: string; label: string }>();
   const edges: Array<{ from: string; to: string; label: string }> = [];
 
   for (const [devName, devInfo] of parsed.devices) {
-    devices.push({ id: `dev:${devName}`, label: devName });
+    devices.push({ id: `dev:${devName}`, label: devName, kind: getDeviceKind(devName) });
 
     for (const [index, iface] of devInfo.interfaces) {
       // Strip quotes from value
@@ -42,7 +59,7 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
     ...devices.map((d) => ({
       id: d.id,
       label: d.label,
-      shape: 'box',
+      shape: d.kind,
       color: { background: '#4FC3F7', border: '#0277BD' },
       font: { color: '#000000' },
     })),
@@ -103,10 +120,51 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
     }
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-box {
-      width: 16px; height: 16px;
-      border-radius: 3px;
+      width: 18px; height: 12px;
+      border-radius: 2px;
       border: 2px solid var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
       background: var(--vscode-button-background);
+      position: relative;
+    }
+    .legend-box::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      bottom: -5px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
+    }
+    .legend-router {
+      width: 20px; height: 12px;
+      border: 2px solid var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
+      background: var(--vscode-button-background);
+      border-radius: 50% / 45%;
+    }
+    .legend-server {
+      width: 12px; height: 16px;
+      border-radius: 2px;
+      border: 2px solid var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
+      background: var(--vscode-button-background);
+      transform: skewY(-8deg);
+    }
+    .legend-laptop {
+      width: 20px; height: 11px;
+      border: 2px solid var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
+      background: var(--vscode-button-background);
+      clip-path: polygon(8% 0%, 92% 0%, 100% 75%, 0% 75%);
+      position: relative;
+    }
+    .legend-laptop::after {
+      content: '';
+      position: absolute;
+      left: -2px;
+      right: -2px;
+      bottom: -5px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--vscode-button-hoverBackground, var(--vscode-focusBorder));
     }
     .legend-ellipse {
       width: 20px; height: 14px;
@@ -146,7 +204,10 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
     ${edges.length} link${edges.length !== 1 ? 's' : ''}
   </div>
   <div id="legend">
-    <div class="legend-item"><div class="legend-box"></div> Device</div>
+    <div class="legend-item"><div class="legend-box"></div> PC</div>
+    <div class="legend-item"><div class="legend-laptop"></div> Laptop</div>
+    <div class="legend-item"><div class="legend-router"></div> Router</div>
+    <div class="legend-item"><div class="legend-server"></div> Server</div>
     <div class="legend-item"><div class="legend-ellipse"></div> Collision Domain</div>
     <div class="legend-hint">
       Scroll to zoom &nbsp;·&nbsp; Drag canvas to pan &nbsp;·&nbsp; Drag nodes to move &nbsp;·&nbsp; Double-click to reset view
@@ -282,6 +343,52 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
         };
       }
 
+      function nodeDimensions(n) {
+        const baseW = Math.max(n.label.length * 8 + 16, 60);
+        if (n.shape === 'pc') {
+          return { w: Math.max(baseW, 70), h: 42 };
+        }
+        if (n.shape === 'laptop') {
+          return { w: Math.max(baseW, 72), h: 36 };
+        }
+        if (n.shape === 'router') {
+          return { w: Math.max(baseW, 72), h: 34 };
+        }
+        if (n.shape === 'server') {
+          return { w: Math.max(baseW * 0.85, 58), h: 38 };
+        }
+        return { w: baseW, h: 28 };
+      }
+
+      function roundedRectPath(x, y, w, h, rad) {
+        ctx.beginPath();
+        ctx.moveTo(x + rad, y);
+        ctx.lineTo(x + w - rad, y); ctx.arcTo(x + w, y,     x + w, y + rad,     rad);
+        ctx.lineTo(x + w, y + h - rad); ctx.arcTo(x + w, y + h, x + w - rad, y + h, rad);
+        ctx.lineTo(x + rad, y + h); ctx.arcTo(x,     y + h, x,     y + h - rad, rad);
+        ctx.lineTo(x, y + rad);     ctx.arcTo(x,     y,     x + rad, y,          rad);
+        ctx.closePath();
+      }
+
+      function strokeAndFillPath() {
+        ctx.fill();
+        ctx.lineWidth = 2 / scale;
+        ctx.stroke();
+      }
+
+      function nodeLabelY(n, p) {
+        if (n.shape === 'pc') {
+          return p.y - 4;
+        }
+        if (n.shape === 'laptop') {
+          return p.y + 5;
+        }
+        if (n.shape === 'server') {
+          return p.y + 1;
+        }
+        return p.y;
+      }
+
       // ── Drawing ───────────────────────────────────────────────────────────
       function draw() {
         const C = getColors();
@@ -313,33 +420,120 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
         for (const n of nodes) {
           const p = pos[n.id];
           if (!p) continue;
-          const isDevice = n.shape === 'box';
-          ctx.beginPath();
+          const isDevice = n.shape !== 'ellipse';
+
           if (isDevice) {
-            const w = Math.max(n.label.length * 8 + 16, 60), h = 28, rad = 4;
+            const { w, h } = nodeDimensions(n);
             const x = p.x - w / 2, y = p.y - h / 2;
-            ctx.moveTo(x + rad, y);
-            ctx.lineTo(x + w - rad, y); ctx.arcTo(x + w, y,     x + w, y + rad,     rad);
-            ctx.lineTo(x + w, y + h - rad); ctx.arcTo(x + w, y + h, x + w - rad, y + h, rad);
-            ctx.lineTo(x + rad, y + h); ctx.arcTo(x,     y + h, x,     y + h - rad, rad);
-            ctx.lineTo(x, y + rad);     ctx.arcTo(x,     y,     x + rad, y,          rad);
-            ctx.closePath();
-            ctx.fillStyle   = C.deviceFill;
+            ctx.fillStyle = C.deviceFill;
             ctx.strokeStyle = C.deviceStroke;
+
+            if (n.shape === 'router') {
+              const rx = w / 2;
+              const topY = p.y - h * 0.2;
+              const bottomY = p.y + h * 0.24;
+              const curveDepth = h * 0.24;
+
+              ctx.beginPath();
+              ctx.moveTo(p.x - rx, topY);
+              ctx.lineTo(p.x - rx, bottomY);
+              ctx.quadraticCurveTo(p.x, bottomY + curveDepth, p.x + rx, bottomY);
+              ctx.lineTo(p.x + rx, topY);
+              ctx.quadraticCurveTo(p.x, topY - h * 0.18, p.x - rx, topY);
+              ctx.closePath();
+              strokeAndFillPath();
+
+              ctx.beginPath();
+              ctx.ellipse(p.x, topY, rx, h * 0.14, 0, 0, 2 * Math.PI);
+              strokeAndFillPath();
+            } else if (n.shape === 'laptop') {
+              const screenH = h * 0.62;
+              ctx.beginPath();
+              ctx.moveTo(x + w * 0.16, y + h - screenH);
+              ctx.lineTo(x + w * 0.84, y + h - screenH);
+              ctx.lineTo(x + w * 0.9, y + h);
+              ctx.lineTo(x + w * 0.1, y + h);
+              ctx.closePath();
+              strokeAndFillPath();
+
+              ctx.beginPath();
+              ctx.moveTo(x + w * 0.16, y + h * 0.04);
+              ctx.lineTo(x + w * 0.84, y + h * 0.04);
+              ctx.lineTo(x + w * 0.98, y + screenH);
+              ctx.lineTo(x + w * 0.02, y + screenH);
+              ctx.closePath();
+              strokeAndFillPath();
+            } else if (n.shape === 'server') {
+              const depth = Math.max(7, Math.round(w * 0.14));
+              const frontX = x;
+              const frontY = y + depth * 0.45;
+              const frontW = w - depth;
+              const frontH = h - depth * 0.55;
+
+              ctx.beginPath();
+              ctx.moveTo(frontX, frontY);
+              ctx.lineTo(frontX + depth, y);
+              ctx.lineTo(frontX + depth + frontW, y);
+              ctx.lineTo(frontX + frontW, frontY);
+              ctx.closePath();
+              strokeAndFillPath();
+
+              ctx.beginPath();
+              ctx.moveTo(frontX + frontW, frontY);
+              ctx.lineTo(frontX + depth + frontW, y);
+              ctx.lineTo(frontX + depth + frontW, y + frontH);
+              ctx.lineTo(frontX + frontW, frontY + frontH);
+              ctx.closePath();
+              strokeAndFillPath();
+
+              ctx.beginPath();
+              ctx.rect(frontX, frontY, frontW, frontH);
+              ctx.closePath();
+              strokeAndFillPath();
+
+              ctx.beginPath();
+              ctx.moveTo(frontX + frontW * 0.18, frontY + frontH * 0.28);
+              ctx.lineTo(frontX + frontW * 0.82, frontY + frontH * 0.28);
+              ctx.moveTo(frontX + frontW * 0.18, frontY + frontH * 0.52);
+              ctx.lineTo(frontX + frontW * 0.82, frontY + frontH * 0.52);
+              ctx.moveTo(frontX + frontW * 0.18, frontY + frontH * 0.76);
+              ctx.lineTo(frontX + frontW * 0.82, frontY + frontH * 0.76);
+              ctx.lineWidth = 1.4 / scale;
+              ctx.stroke();
+            } else if (n.shape === 'pc') {
+              const screenH = h * 0.6;
+              roundedRectPath(x, y, w, screenH, 3);
+              strokeAndFillPath();
+
+              const standW = Math.max(10, w * 0.12);
+              const standH = h * 0.16;
+              roundedRectPath(p.x - standW / 2, y + screenH + h * 0.03, standW, standH, 1.5);
+              strokeAndFillPath();
+
+              const baseW = w * 0.58;
+              const baseH = h * 0.12;
+              roundedRectPath(p.x - baseW / 2, y + h - baseH, baseW, baseH, 1.5);
+              strokeAndFillPath();
+            } else {
+              roundedRectPath(x, y, w, h, 4);
+              strokeAndFillPath();
+            }
           } else {
             const rx = Math.max(n.label.length * 5 + 16, 40), ry = 20;
+            ctx.beginPath();
             ctx.ellipse(p.x, p.y, rx, ry, 0, 0, 2 * Math.PI);
             ctx.fillStyle   = C.domainFill;
             ctx.strokeStyle = C.domainStroke;
+            ctx.fill();
+            ctx.lineWidth = 2 / scale;
+            ctx.stroke();
           }
-          ctx.fill();
-          ctx.lineWidth = 2 / scale;
-          ctx.stroke();
+
           ctx.fillStyle = isDevice ? C.deviceText : C.domainText;
           ctx.font = \`bold \${12 / scale}px var(--vscode-font-family, monospace)\`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(n.label, p.x, p.y);
+          ctx.fillText(n.label, p.x, nodeLabelY(n, p));
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -353,18 +547,14 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
       let lastX = 0, lastY = 0;
       let nodeDragOffsetX = 0, nodeDragOffsetY = 0;
 
-      function nodeRadius(n) {
-        return n.shape === 'box' ? 40 : 40;
-      }
-
       function hitTest(wx, wy) {
         // Test in reverse order so top-rendered nodes are picked first
         for (let i = nodes.length - 1; i >= 0; i--) {
           const n = nodes[i];
           const p = pos[n.id];
           if (!p) continue;
-          if (n.shape === 'box') {
-            const w = Math.max(n.label.length * 8 + 16, 60), h = 28;
+          if (n.shape !== 'ellipse') {
+            const { w, h } = nodeDimensions(n);
             if (wx >= p.x - w/2 && wx <= p.x + w/2 && wy >= p.y - h/2 && wy <= p.y + h/2) return n;
           } else {
             const rx = Math.max(n.label.length * 5 + 16, 40), ry = 20;

@@ -25,9 +25,6 @@
   },
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onLanguage:lab-conf",
-    "onLanguage:lab-dep",
-    "onLanguage:lab-ext",
     "onLanguage:shellscript",
     "workspaceContains:**/lab.conf"
   ],
@@ -186,6 +183,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
+    "doctor": "node ./scripts/doctor.js",
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
     "build:dev": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",

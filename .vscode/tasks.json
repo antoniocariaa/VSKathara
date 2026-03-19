@@ -4,8 +4,8 @@
     {
       "label": "build:dev",
       "type": "shell",
-      "command": "wsl",
-      "args": ["-e", "bash", "-c", "npm run build:dev"],
+      "command": "npm",
+      "args": ["run", "build:dev"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "presentation": {
@@ -17,8 +17,8 @@
     {
       "label": "build (production)",
       "type": "shell",
-      "command": "wsl",
-      "args": ["-e", "bash", "-c", "npm run build"],
+      "command": "npm",
+      "args": ["run", "build"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "presentation": {
@@ -30,8 +30,8 @@
     {
       "label": "watch",
       "type": "shell",
-      "command": "wsl",
-      "args": ["-e", "bash", "-c", "npm run watch"],
+      "command": "npm",
+      "args": ["run", "watch"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "isBackground": true,
@@ -44,8 +44,8 @@
     {
       "label": "type-check",
       "type": "shell",
-      "command": "wsl",
-      "args": ["-e", "bash", "-c", "npx tsc -p tsconfig.json --noEmit"],
+      "command": "npm",
+      "args": ["run", "compile"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "presentation": {

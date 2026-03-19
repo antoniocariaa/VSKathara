@@ -76,7 +76,20 @@ All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the E
 
 ## Development Setup
 
-**Prerequisites:** Node.js and npm (on Windows, use WSL — npm is not in the Windows PATH by default).
+**Prerequisites:**
+- [Node.js](https://nodejs.org/) LTS (includes npm)
+- Git
+- VS Code
+
+### OS-specific notes
+
+| OS | Build / Develop extension | Run Kathara commands (`lstart`, `connect`, …) |
+|---|---|---|
+| Linux | ✅ Native | ✅ Native |
+| macOS | ✅ Native | ⚠️ Depends on your Kathara setup (Docker/Linux backend required) |
+| Windows | ✅ Native (PowerShell or Command Prompt) | ⚠️ Requires a Linux environment for Kathara itself (for example WSL2 or a Linux VM) |
+
+The extension development workflow (`npm install`, `npm run build:dev`, `npm run watch`, `npm run compile`) is now shell-agnostic and works on all three OSes as long as `node`/`npm` are in `PATH`.
 
 ```bash
 git clone https://github.com/KatharaFramework/VSKathara
@@ -91,6 +104,7 @@ Then press **F5** in VS Code to launch the Extension Development Host.
 
 | Script | Description |
 |---|---|
+| `npm run doctor` | Check local environment (Node/npm/Git/VS Code/Kathara) |
 | `npm run build:dev` | Bundle with source maps (development) |
 | `npm run build` | Minified production bundle |
 | `npm run watch` | Rebuild on file changes |
@@ -135,3 +149,11 @@ pc1: r1
 A enp9s0
 B enp9s0.20
 ```
+
+#### ToDO:
+- syntax highlight fix on inline comments
+- different shapes for router, host and collision doman nodes in topology view
+- show bridged devices in topology view (maybe as clouds around the host node?)
+- more complete autocompletion (options inside `lab.ext` and `lab.dep`, metadata keys, etc.)
+- hover docs for `lab.ext` and `lab.dep` options
+- reload lab when lab.conf is saved outside of VS Code 

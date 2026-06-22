@@ -1,13 +1,13 @@
-# VSKathara
+# VSKathará
 
-VS Code extension for [Kathara](https://github.com/KatharaFramework/Kathara) network labs — syntax highlighting, autocompletion, linting, topology view, and terminal commands.
+VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) network labs syntax highlighting, autocompletion, linting, topology view, and terminal commands.
 
 ---
 
 ## Features
 
 ### Syntax Highlighting
-Full grammar support for all Kathara lab files:
+Full grammar support for all Kathará lab files:
 - `lab.conf` — devices, interfaces, options, collision domains, MAC addresses, metadata keys
 - `lab.dep` — startup dependency rules
 - `lab.ext` — external network mappings
@@ -45,8 +45,8 @@ Errors and warnings are shown inline as you type:
 | Device names in `lab.dep` / `.startup` not declared in `lab.conf` | Warning |
 
 ### Topology View
-Run **Kathara: Show Topology** (or click the icon in the `lab.conf` editor title bar) to open an interactive network graph:
-- Device shapes are inferred from host name prefixes (Packet Tracer-inspired, simplified):
+Run **Kathará: Show Topology** (or click the icon in the `lab.conf` editor title bar) to open an interactive network graph:
+- Device shapes are inferred from host name prefixes:
 	- `pc*` → **PC** shape (monitor)
 	- `lt*` → **Laptop** shape
 	- `r*` → **Router** shape
@@ -58,24 +58,24 @@ Run **Kathara: Show Topology** (or click the icon in the `lab.conf` editor title
 - Colors adapt automatically to any VS Code theme
 - Auto-refreshes when `lab.conf` is edited
 
-### Kathara Commands
+### Kathará Commands
 All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the Explorer context menu on `lab.conf`:
 
 | Command | Action |
 |---|---|
-| `Kathara: Start Lab` | Runs `kathara lstart` in the lab directory |
-| `Kathara: Stop Lab` | Runs `kathara lclean` |
-| `Kathara: Restart Lab` | Runs `kathara lrestart` |
-| `Kathara: Lab Info` | Runs `kathara linfo` |
-| `Kathara: Connect to Device` | Device picker → `kathara connect <device>` |
-| `Kathara: Start Device` | Device picker → `kathara vstart <device>` |
-| `Kathara: Show Topology` | Opens the topology WebView |
+| `Kathará: Start Lab` | Runs `kathara lstart` in the lab directory |
+| `Kathará: Stop Lab` | Runs `kathara lclean` |
+| `Kathará: Restart Lab` | Runs `Kathará lrestart` |
+| `Kathará: Lab Info` | Runs `Kathará linfo` |
+| `Kathará: Connect to Device` | Device picker → `Kathará connect <device>` |
+| `Kathará: Start Device` | Device picker → `Kathará vstart <device>` |
+| `Kathará: Show Topology` | Opens the topology WebView |
 
 ---
 
 ## Requirements
 
-- [Kathara](https://github.com/KatharaFramework/Kathara) installed and available on `PATH`
+- [Kathará](https://github.com/KatharáFramework/Kathará) installed and available on `PATH`
 - VS Code `^1.85.0`
 
 ---
@@ -88,18 +88,11 @@ All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the E
 - VS Code
 
 ### OS-specific notes
-
-| OS | Build / Develop extension | Run Kathara commands (`lstart`, `connect`, …) |
-|---|---|---|
-| Linux | ✅ Native | ✅ Native |
-| macOS | ✅ Native | ⚠️ Depends on your Kathara setup (Docker/Linux backend required) |
-| Windows | ✅ Native (PowerShell or Command Prompt) | ⚠️ Requires a Linux environment for Kathara itself (for example WSL2 or a Linux VM) |
-
-The extension development workflow (`npm install`, `npm run build:dev`, `npm run watch`, `npm run compile`) is now shell-agnostic and works on all three OSes as long as `node`/`npm` are in `PATH`.
+The extension should work for every OS version of VSCode, command will work if the katharà environment is setup correctly, the development workflow (`npm install`, `npm run build:dev`, `npm run watch`, `npm run compile`) works on  every OS as long as `node`/`npm` are in `PATH`.
 
 ```bash
-git clone https://github.com/KatharaFramework/VSKathara
-cd VSKathara
+git clone https://github.com/antoniocariaa/VSKathará
+cd VSKathará
 npm install
 npm run build:dev
 ```
@@ -110,7 +103,7 @@ Then press **F5** in VS Code to launch the Extension Development Host.
 
 | Script | Description |
 |---|---|
-| `npm run doctor` | Check local environment (Node/npm/Git/VS Code/Kathara) |
+| `npm run doctor` | Check local environment (Node/npm/Git/VS Code/Kathará) |
 | `npm run build:dev` | Bundle with source maps (development) |
 | `npm run build` | Minified production bundle |
 | `npm run watch` | Rebuild on file changes |
@@ -123,7 +116,7 @@ VS Code tasks for all of the above are in `.vscode/tasks.json` (**Terminal → R
 
 ## Lab Format Quick Reference
 
-See the [Kathara Lab Format wiki](https://github.com/KatharaFramework/Kathara/wiki/Kathara-Lab-Format) for the full spec.
+See the [Kathará Lab Format wiki](https://github.com/KatharáFramework/Kathará/wiki/Kathará-Lab-Format) for the full spec.
 
 **`lab.conf`** — main topology file:
 ```
@@ -131,7 +124,7 @@ LAB_NAME="My Lab"
 
 r1[0]="A"
 r1[1]="B"
-r1[image]="kathara/frr"
+r1[image]="Kathará/frr"
 r1[sysctl]="net.ipv4.ip_forward=1"
 r1[mem]="128m"
 

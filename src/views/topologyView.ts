@@ -261,49 +261,157 @@ function getWebviewContent(topology: TopologyData, webview: vscode.Webview): str
         };
       }
 
-      // ── Initial node layout ───────────────────────────────────────────────
+      // ── Build Adjacency List ──────────────────────────────────────────────
+      const adj = {};
+      nodes.forEach(n => adj[n.id] = []);
+      edges.forEach(e => {
+        if (adj[e.from] && adj[e.to]) {
+          adj[e.from].push(e.to);
+          adj[e.to].push(e.from);
+        }
+      });
+
+      // ── Tree-Aware Radial/BFS Initial Layout ──────────────────────────────
       const pos = {};
-      // World-space layout: use a virtual 800×600 canvas so positions are
-      // independent of the actual window size
       const WW = 800, WH = 600;
       const cx = WW / 2, cy = WH / 2;
-      const r  = Math.min(cx, cy) * 0.75;
-      nodes.forEach((n, i) => {
-        const angle = (2 * Math.PI * i) / nodes.length - Math.PI / 2;
-        pos[n.id] = { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
-      });
+
+      // Find connected components
+      const visited = new Set();
+      const components = [];
+      for (const n of nodes) {
+        if (!visited.has(n.id)) {
+          const comp = [];
+          const q = [n.id];
+          visited.add(n.id);
+          while (q.length > 0) {
+            const curr = q.shift();
+            comp.push(curr);
+            for (const neighbor of adj[curr]) {
+              if (!visited.has(neighbor)) {
+                visited.add(neighbor);
+                q.push(neighbor);
+              }
+            }
+          }
+          components.push(comp);
+        }
+      }
+
+      // Initialize positions
+      let currentAngle = 0;
+      for (const comp of components) {
+        // Pick root based on degree (max degree first) for each component
+        let root = comp[0];
+        let maxDegree = -1;
+        for (const id of comp) {
+          if (adj[id].length > maxDegree) {
+            maxDegree = adj[id].length;
+            root = id;
+          }
+        }
+
+        // BFS to get levels
+        const levels = [[root]];
+        const localVisited = new Set([root]);
+        let q = [root];
+        while (q.length > 0) {
+          const nextQ = [];
+          for (const u of q) {
+            for (const v of adj[u]) {
+              if (!localVisited.has(v)) {
+                localVisited.add(v);
+                nextQ.push(v);
+              }
+            }
+          }
+          if (nextQ.length > 0) levels.push(nextQ);
+          q = nextQ;
+        }
+
+        const compAngleStep = (2 * Math.PI) / components.length;
+        const availableAngle = compAngleStep * 0.9;
+        
+        levels.forEach((levelNodes, depth) => {
+          const r = Math.min(cx, cy) * 0.25 * depth + (components.length > 1 ? 100 : 0);
+          if (depth === 0) {
+             pos[levelNodes[0]] = {
+               x: cx + (components.length > 1 ? r * Math.cos(currentAngle + compAngleStep/2) : 0),
+               y: cy + (components.length > 1 ? r * Math.sin(currentAngle + compAngleStep/2) : 0)
+             };
+          } else {
+             const angleStep = availableAngle / levelNodes.length;
+             let startAngle = currentAngle + compAngleStep / 2 - availableAngle / 2 + angleStep / 2;
+             levelNodes.forEach((id, i) => {
+               const angle = startAngle + i * angleStep;
+               pos[id] = {
+                 x: cx + r * Math.cos(angle),
+                 y: cy + r * Math.sin(angle)
+               };
+             });
+          }
+        });
+        currentAngle += compAngleStep;
+      }
 
       // ── Force simulation ─────────────────────────────────────────────────
       function simulate(steps) {
-        const k = Math.sqrt((WW * WH) / nodes.length);
+        const k = Math.sqrt((WW * WH) / nodes.length) * 0.8;
         for (let s = 0; s < steps; s++) {
+          const t = Math.max(0.01, 1 - s / steps);
+          const forces = {};
+          nodes.forEach(n => forces[n.id] = { x: 0, y: 0 });
+
+          // Repulsion
           for (let i = 0; i < nodes.length; i++) {
-            let fx = 0, fy = 0;
-            for (let j = 0; j < nodes.length; j++) {
-              if (i === j) continue;
+            for (let j = i + 1; j < nodes.length; j++) {
               const dx = pos[nodes[i].id].x - pos[nodes[j].id].x;
               const dy = pos[nodes[i].id].y - pos[nodes[j].id].y;
-              const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+              let distSq = dx * dx + dy * dy;
+              if (distSq === 0) distSq = 1;
+              const dist = Math.sqrt(distSq);
               const force = (k * k) / dist;
-              fx += (dx / dist) * force;
-              fy += (dy / dist) * force;
+              const fx = (dx / dist) * force;
+              const fy = (dy / dist) * force;
+              forces[nodes[i].id].x += fx;
+              forces[nodes[i].id].y += fy;
+              forces[nodes[j].id].x -= fx;
+              forces[nodes[j].id].y -= fy;
             }
-            pos[nodes[i].id].x += fx * 0.01;
-            pos[nodes[i].id].y += fy * 0.01;
           }
+
+          // Attraction
           for (const e of edges) {
             const p1 = pos[e.from], p2 = pos[e.to];
             if (!p1 || !p2) continue;
-            const dx = p2.x - p1.x, dy = p2.y - p1.y;
+            const dx = p1.x - p2.x, dy = p1.y - p2.y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const force = (dist * dist) / k * 0.01;
-            p1.x += (dx / dist) * force;  p1.y += (dy / dist) * force;
-            p2.x -= (dx / dist) * force;  p2.y -= (dy / dist) * force;
+            const force = (dist * dist) / k;
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            forces[e.from].x -= fx;
+            forces[e.from].y -= fy;
+            forces[e.to].x += fx;
+            forces[e.to].y += fy;
+          }
+
+          // Apply forces
+          for (const n of nodes) {
+            let dx = forces[n.id].x * 0.05 * t;
+            let dy = forces[n.id].y * 0.05 * t;
+            const maxMove = 20 * t;
+            const moveLen = Math.sqrt(dx * dx + dy * dy);
+            if (moveLen > maxMove) {
+              dx = (dx / moveLen) * maxMove;
+              dy = (dy / moveLen) * maxMove;
+            }
+            pos[n.id].x += dx;
+            pos[n.id].y += dy;
           }
         }
       }
 
-      simulate(200);
+      simulate(300);
 
       // Center the simulated layout in the viewport initially
       function fitToView() {

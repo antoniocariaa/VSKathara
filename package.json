@@ -1,23 +1,33 @@
 {
   "name": "vskathara",
-  "displayName": "VSKathara",
-  "description": "Kathara network lab tooling: syntax highlighting, autocompletion, linting, commands, and topology view.",
+  "displayName": "VSKathará",
+  "description": "Kathará network lab tooling: syntax highlighting, autocompletion, linting, commands, and topology view.",
   "version": "0.1.0",
-  "publisher": "vskathara",
+  "publisher": "antoniocariaa",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Programming Languages",
     "Linters",
-    "Snippets"
+    "Snippets",
+    "Education",
+    "Other"
   ],
   "keywords": [
     "kathara",
     "netkit",
     "network",
     "lab",
-    "emulation"
+    "emulation",
+    "cisco",
+    "packet",
+    "graph",
+    "topology",
+    "visualization",
+    "syntax",
+    "highlighting",
+    "autocompletion"
   ],
   "repository": {
     "type": "git",
@@ -96,37 +106,37 @@
     "commands": [
       {
         "command": "kathara.lstart",
-        "title": "Kathara: Start Lab",
+        "title": "Start Lab",
         "category": "Kathara"
       },
       {
         "command": "kathara.lclean",
-        "title": "Kathara: Stop Lab",
+        "title": "Stop Lab",
         "category": "Kathara"
       },
       {
         "command": "kathara.lrestart",
-        "title": "Kathara: Restart Lab",
+        "title": "Restart Lab",
         "category": "Kathara"
       },
       {
         "command": "kathara.linfo",
-        "title": "Kathara: Lab Info",
+        "title": "Lab Info",
         "category": "Kathara"
       },
       {
         "command": "kathara.connect",
-        "title": "Kathara: Connect to Device",
+        "title": "Connect to Device",
         "category": "Kathara"
       },
       {
         "command": "kathara.vstart",
-        "title": "Kathara: Start Device",
+        "title": "Start Device",
         "category": "Kathara"
       },
       {
         "command": "kathara.showTopology",
-        "title": "Kathara: Show Topology",
+        "title": "Show Topology",
         "category": "Kathara",
         "icon": "$(type-hierarchy)"
       }

@@ -4,7 +4,7 @@
     {
       "label": "build:dev",
       "type": "shell",
-      "command": "npm",
+      "command": "wsl",
       "args": ["run", "build:dev"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",

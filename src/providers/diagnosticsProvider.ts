@@ -10,6 +10,7 @@ import {
   type InterfaceAssignment,
   type OptionAssignment,
 } from '../parser/labConfParser';
+import { getDevicesFromLabConf } from '../utils/labUtils';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -302,19 +303,7 @@ function validateLabExt(doc: vscode.TextDocument): vscode.Diagnostic[] {
 }
 
 // ─── cross-file helper ───────────────────────────────────────────────────────
-
-async function getDevicesFromLabConf(docUri: vscode.Uri): Promise<Set<string> | null> {
-  const dir = path.dirname(docUri.fsPath);
-  const labConfUri = vscode.Uri.file(path.join(dir, 'lab.conf'));
-  try {
-    const bytes = await vscode.workspace.fs.readFile(labConfUri);
-    const text = Buffer.from(bytes).toString('utf-8');
-    const parsed = parseLabConf(text);
-    return new Set(parsed.devices.keys());
-  } catch {
-    return null;
-  }
-}
+// (Now handled by src/utils/labUtils.ts)
 
 // ─── main provider class ─────────────────────────────────────────────────────
 
@@ -347,7 +336,7 @@ export class DiagnosticsProvider {
   }
 
   private async updateDiagnostics(doc: vscode.TextDocument): Promise<void> {
-    const fname = path.basename(doc.fileName);
+    const fname = doc.fileName.split(path.sep).pop() || '';
     const lang = doc.languageId;
 
     if (lang === 'lab-conf' || fname === 'lab.conf') {

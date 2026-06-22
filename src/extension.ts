@@ -16,12 +16,17 @@ export function activate(context: vscode.ExtensionContext): void {
       [
         { language: 'lab-conf' },
         { pattern: '**/lab.conf' },
+        { language: 'lab-dep' },
+        { pattern: '**/lab.dep' },
+        { language: 'lab-ext' },
+        { pattern: '**/lab.ext' },
       ],
       new LabConfCompletionProvider(),
       '[',   // trigger inside brackets
       '=',   // trigger after assignment
       '/',   // trigger for protocol/vlan
       '|',   // trigger for volume mode
+      ':',   // trigger for dependencies
     ),
   );
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { OPTION_NAMES, META_KEYS, parseLabConf, BOOLEAN_OPTIONS, type OptionName } from '../parser/labConfParser';
+import { getDevicesFromLabConf, getCollisionDomainsFromLabConf } from '../utils/labUtils';
 
 // ─── Option metadata ──────────────────────────────────────────────────────────
 
@@ -107,72 +108,102 @@ const OPTION_META: Record<OptionName, OptionMeta> = {
 // ─── Completion Provider ──────────────────────────────────────────────────────
 
 export class LabConfCompletionProvider implements vscode.CompletionItemProvider {
-  provideCompletionItems(
+  async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
-  ): vscode.CompletionItem[] {
+  ): Promise<vscode.CompletionItem[]> {
     const line = document.lineAt(position).text;
     const linePrefix = line.slice(0, position.character);
+    const language = document.languageId;
 
-    // ── 1. Inside brackets: suggest option names ──────────────────────────────
-    //   matches: someDevice[<cursor>]  or  someDevice[partial<cursor>]
-    const insideBracket = /^[A-Za-z_][A-Za-z0-9_-]*\[([A-Za-z0-9_]*)$/.exec(linePrefix);
-    if (insideBracket) {
-      return this.optionCompletions();
+    // ─── Lab Conf completions ──────────────────────────────────────────────────────
+    if (language === 'lab-conf' || document.fileName.endsWith('lab.conf')) {
+      // 1. Inside brackets: suggest option names
+      const insideBracket = /^[A-Za-z_][A-Za-z0-9_-]*\[([A-Za-z0-9_]*)$/.exec(linePrefix);
+      if (insideBracket) {
+        return this.optionCompletions();
+      }
+
+      // 2. After '=' for boolean options
+      const boolEq = /^[A-Za-z_][A-Za-z0-9_-]*\[(bridged|ipv6|privileged)\]\s*=\s*$/.exec(linePrefix);
+      if (boolEq) {
+        return [
+          this.simpleItem('true', vscode.CompletionItemKind.Value, 'Boolean true'),
+          this.simpleItem('false', vscode.CompletionItemKind.Value, 'Boolean false'),
+        ];
+      }
+
+      // 3. After '=' for port: protocol suggestions
+      const portProtocol = /^[A-Za-z_][A-Za-z0-9_-]*\[port\]\s*=\s*\d+(?::\d+)?\/([A-Za-z]*)$/.exec(linePrefix);
+      if (portProtocol) {
+        return ['tcp', 'udp', 'sctp'].map((p) => this.simpleItem(p, vscode.CompletionItemKind.Value, `${p.toUpperCase()} protocol`));
+      }
+
+      // 4. After '=' for volume: mode suggestions
+      const volumeMode = /^[A-Za-z_][A-Za-z0-9_-]*\[volume\]\s*=\s*[^|]+\|[^|]+\|([A-Za-z]*)$/.exec(linePrefix);
+      if (volumeMode) {
+        return ['ro', 'rw', 'rx'].map((m) => this.simpleItem(m, vscode.CompletionItemKind.Value, `Volume mode: ${m}`));
+      }
+
+      // 5. After '=' for shell
+      const shellEq = /^[A-Za-z_][A-Za-z0-9_-]*\[shell\]\s*=\s*$/.exec(linePrefix);
+      if (shellEq) {
+        return ['/bin/bash', '/bin/sh', '/bin/zsh', '/bin/ash'].map((sh) =>
+          this.simpleItem(sh, vscode.CompletionItemKind.Value, `Shell: ${sh}`),
+        );
+      }
+
+      // 6. After '=' for sysctl: common net.* values
+      const sysctlEq = /^[A-Za-z_][A-Za-z0-9_-]*\[sysctl\]\s*=\s*$/.exec(linePrefix);
+      if (sysctlEq) {
+        return [
+          'net.ipv4.ip_forward=1',
+          'net.ipv6.conf.all.forwarding=1',
+          'net.ipv4.conf.all.rp_filter=0',
+          'net.ipv4.conf.default.rp_filter=0',
+        ].map((s) => this.simpleItem(s, vscode.CompletionItemKind.Value, 'sysctl value'));
+      }
+
+      // 7. After '=' for image: common Kathara images
+      const imageEq = /^[A-Za-z_][A-Za-z0-9_-]*\[image\]\s*=\s*$/.exec(linePrefix);
+      if (imageEq) {
+        const knownImages = this.collectImagesFromDocument(document);
+        const defaults = ['kathara/base', 'kathara/frr', 'kathara/quagga', 'kathara/bind9', 'kathara/openssl'];
+        const all = [...new Set([...knownImages, ...defaults])];
+        return all.map((img) => this.simpleItem(img, vscode.CompletionItemKind.Value, 'Docker image'));
+      }
+
+      // 8. Start of a line: suggest LAB_* meta keys or device snippets
+      if (/^\s*$/.test(linePrefix) || /^[A-Za-z_]?$/.test(linePrefix)) {
+        return this.topLevelCompletions();
+      }
     }
 
-    // ── 2. After '=' for boolean options ──────────────────────────────────────
-    const boolEq = /^[A-Za-z_][A-Za-z0-9_-]*\[(bridged|ipv6|privileged)\]\s*=\s*$/.exec(linePrefix);
-    if (boolEq) {
-      return [
-        this.simpleItem('true', vscode.CompletionItemKind.Value, 'Boolean true'),
-        this.simpleItem('false', vscode.CompletionItemKind.Value, 'Boolean false'),
-      ];
+    // ─── Lab Dep completions ──────────────────────────────────────────────────────
+    if (language === 'lab-dep' || document.fileName.endsWith('lab.dep')) {
+      // Suggest devices before ':' or after ':'
+      if (/^\s*$/.test(linePrefix) || /^\s*[A-Za-z_][A-Za-z0-9_-]*\s*$/.test(linePrefix) || /.*:\s*$/.test(linePrefix)) {
+        const devices = await getDevicesFromLabConf(document.uri);
+        if (devices) {
+          return Array.from(devices).map((dev) => this.simpleItem(dev, vscode.CompletionItemKind.Class, 'Device name'));
+        }
+      }
     }
 
-    // ── 3. After '=' for port: protocol suggestions ───────────────────────────
-    const portProtocol = /^[A-Za-z_][A-Za-z0-9_-]*\[port\]\s*=\s*\d+(?::\d+)?\/([A-Za-z]*)$/.exec(linePrefix);
-    if (portProtocol) {
-      return ['tcp', 'udp', 'sctp'].map((p) => this.simpleItem(p, vscode.CompletionItemKind.Value, `${p.toUpperCase()} protocol`));
-    }
-
-    // ── 4. After '=' for volume: mode suggestions ─────────────────────────────
-    const volumeMode = /^[A-Za-z_][A-Za-z0-9_-]*\[volume\]\s*=\s*[^|]+\|[^|]+\|([A-Za-z]*)$/.exec(linePrefix);
-    if (volumeMode) {
-      return ['ro', 'rw', 'rx'].map((m) => this.simpleItem(m, vscode.CompletionItemKind.Value, `Volume mode: ${m}`));
-    }
-
-    // ── 5. After '=' for shell ─────────────────────────────────────────────────
-    const shellEq = /^[A-Za-z_][A-Za-z0-9_-]*\[shell\]\s*=\s*$/.exec(linePrefix);
-    if (shellEq) {
-      return ['/bin/bash', '/bin/sh', '/bin/zsh', '/bin/ash'].map((sh) =>
-        this.simpleItem(sh, vscode.CompletionItemKind.Value, `Shell: ${sh}`),
-      );
-    }
-
-    // ── 6. After '=' for sysctl: common net.* values ─────────────────────────
-    const sysctlEq = /^[A-Za-z_][A-Za-z0-9_-]*\[sysctl\]\s*=\s*$/.exec(linePrefix);
-    if (sysctlEq) {
-      return [
-        'net.ipv4.ip_forward=1',
-        'net.ipv6.conf.all.forwarding=1',
-        'net.ipv4.conf.all.rp_filter=0',
-        'net.ipv4.conf.default.rp_filter=0',
-      ].map((s) => this.simpleItem(s, vscode.CompletionItemKind.Value, 'sysctl value'));
-    }
-
-    // ── 7. After '=' for image: common Kathara images ─────────────────────────
-    const imageEq = /^[A-Za-z_][A-Za-z0-9_-]*\[image\]\s*=\s*$/.exec(linePrefix);
-    if (imageEq) {
-      const knownImages = this.collectImagesFromDocument(document);
-      const defaults = ['kathara/base', 'kathara/frr', 'kathara/quagga', 'kathara/bind9', 'kathara/openssl'];
-      const all = [...new Set([...knownImages, ...defaults])];
-      return all.map((img) => this.simpleItem(img, vscode.CompletionItemKind.Value, 'Docker image'));
-    }
-
-    // ── 8. Start of a line: suggest LAB_* meta keys or device snippets ────────
-    if (/^\s*$/.test(linePrefix) || /^[A-Za-z_]?$/.test(linePrefix)) {
-      return this.topLevelCompletions();
+    // ─── Lab Ext completions ──────────────────────────────────────────────────────
+    if (language === 'lab-ext' || document.fileName.endsWith('lab.ext')) {
+      // 1. Suggest collision domains at start of line
+      if (/^\s*$/.test(linePrefix) || /^\s*[A-Za-z0-9_-]*$/.test(linePrefix)) {
+        const domains = await getCollisionDomainsFromLabConf(document.uri);
+        if (domains) {
+          return Array.from(domains).map((d) => this.simpleItem(d, vscode.CompletionItemKind.Value, 'Collision domain'));
+        }
+      }
+      // 2. Suggest network interfaces after the domain name
+      if (/^\s*[A-Za-z0-9_-]+\s+$/.test(linePrefix)) {
+        const commonIfaces = ['eth0', 'eth1', 'enp0s3', 'enp3s0', 'wlan0', 'lo'];
+        return commonIfaces.map((iface) => this.simpleItem(iface, vscode.CompletionItemKind.Variable, 'Network interface'));
+      }
     }
 
     return [];

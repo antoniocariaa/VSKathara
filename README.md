@@ -158,6 +158,5 @@ B enp9s0.20
 
 #### ToDO:
 - show bridged devices in topology view (maybe as clouds around the host node?)
-- more complete autocompletion (options inside `lab.ext` and `lab.dep`, metadata keys, etc.)
 - hover docs for `lab.ext` and `lab.dep` options
 - reload lab when lab.conf is saved outside of VS Code 

@@ -8,10 +8,10 @@ VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) ne
 
 ### Syntax Highlighting
 Full grammar support for all Kathará lab files:
-- `lab.conf` — devices, interfaces, options, collision domains, MAC addresses, metadata keys
-- `lab.dep` — startup dependency rules
-- `lab.ext` — external network mappings
-- `*.startup` — reuses the built-in shell grammar
+- `lab.conf`: devices, interfaces, options, collision domains, MAC addresses, metadata keys
+- `lab.dep`: startup dependency rules
+- `lab.ext`: external network mappings
+- `*.startup`: reuses the built-in shell grammar
 
 ### Autocompletion (`lab.conf`)
 - All 16 device option names (`image`, `mem`, `port`, `sysctl`, `exec`, `volume`…) with descriptions inside `device[…]`
@@ -65,10 +65,10 @@ All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the E
 |---|---|
 | `Kathará: Start Lab` | Runs `kathara lstart` in the lab directory |
 | `Kathará: Stop Lab` | Runs `kathara lclean` |
-| `Kathará: Restart Lab` | Runs `Kathará lrestart` |
-| `Kathará: Lab Info` | Runs `Kathará linfo` |
-| `Kathará: Connect to Device` | Device picker → `Kathará connect <device>` |
-| `Kathará: Start Device` | Device picker → `Kathará vstart <device>` |
+| `Kathará: Restart Lab` | Runs `kathara lrestart` |
+| `Kathará: Lab Info` | Runs `kathara linfo` |
+| `Kathará: Connect to Device` | Device picker → `kathara connect <device>` |
+| `Kathará: Start Device` | Device picker → `kathara vstart <device>` |
 | `Kathará: Show Topology` | Opens the topology WebView |
 
 ---
@@ -153,3 +153,4 @@ B enp9s0.20
 - show bridged devices in topology view (maybe as clouds around the host node?)
 - hover docs for `lab.ext` and `lab.dep` options
 - reload lab when lab.conf is saved outside of VS Code 
+- publish extension

@@ -92,7 +92,7 @@ The extension should work for every OS version of VSCode, command will work if t
 
 ```bash
 git clone https://github.com/antoniocariaa/VSKathará
-cd VSKathará
+cd VSKathara
 npm install
 npm run build:dev
 ```
@@ -124,7 +124,7 @@ LAB_NAME="My Lab"
 
 r1[0]="A"
 r1[1]="B"
-r1[image]="Kathará/frr"
+r1[image]="kathara/base"
 r1[sysctl]="net.ipv4.ip_forward=1"
 r1[mem]="128m"
 

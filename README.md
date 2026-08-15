@@ -154,3 +154,4 @@ B enp9s0.20
 - hover docs for `lab.ext` and `lab.dep` options
 - reload lab when lab.conf is saved outside of VS Code 
 - publish extension
+- automated [tests](src/test/todo.md)

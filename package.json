@@ -3,6 +3,7 @@
   "displayName": "VSKathará",
   "description": "Kathará network lab tooling: syntax highlighting, autocompletion, linting, commands, and topology view.",
   "version": "0.1.0",
+  "icon": "logo.png",
   "publisher": "antoniocariaa",
   "engines": {
     "vscode": "^1.85.0"

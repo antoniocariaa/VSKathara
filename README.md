@@ -1,8 +1,11 @@
+<div align="center">
+
+<img src="logo.png" alt="VSKathara Logo" width="200"/>
+
 # VSKathará
 
 VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) network labs syntax highlighting, autocompletion, linting, topology view, and terminal commands.
-
----
+</div>
 
 ## Features
 

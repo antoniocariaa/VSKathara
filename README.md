@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="VSKathara Logo" width="200"/>
+<img src="readme_logo.png" alt="VSKathara Logo" width="200"/>
 
 # VSKathará
 

@@ -7,6 +7,21 @@
 VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) network labs syntax highlighting, autocompletion, linting, topology view, and terminal commands.
 </div>
 
+## Quick Install
+```bash
+# Clone the repository and install the dependencies
+git clone https://github.com/antoniocariaa/VSKathará
+cd VSKathara
+npm install
+
+# Package the extention in a .vsix file
+vsce package
+
+# Install the generated .vsix file
+code --install-extension vskathara-*.vsix 
+```
+
+
 ## Features
 
 ### Syntax Highlighting

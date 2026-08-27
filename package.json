@@ -2,7 +2,7 @@
   "name": "vskathara",
   "displayName": "VSKathará",
   "description": "Kathará network lab tooling: syntax highlighting, autocompletion, linting, commands, and topology view.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "icon": "logo.png",
   "publisher": "antoniocariaa",
   "engines": {
@@ -208,7 +208,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.2.0",
-    "@types/vscode": "^1.125.0",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
     "@vscode/test-electron": "^3.1.0",

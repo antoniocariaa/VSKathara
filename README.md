@@ -3,6 +3,7 @@
 <img src="readme_logo.png" alt="VSKathara Logo" width="200"/>
 
 # VSKathará
+![Open VSX Version](https://img.shields.io/open-vsx/v/antoniocariaa/vskathara)
 
 VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) network labs syntax highlighting, autocompletion, linting, topology view, and terminal commands.
 </div>

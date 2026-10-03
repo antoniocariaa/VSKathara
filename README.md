@@ -12,11 +12,11 @@ VS Code extension for [Kathará](https://github.com/KatharaFramework/Kathara) ne
 ## Quick Install
 ```bash
 # Clone the repository and install the dependencies
-git clone https://github.com/antoniocariaa/VSKathará
+git clone https://github.com/antoniocariaa/VSKathara.git
 cd VSKathara
 npm install
 
-# Package the extention in a .vsix file
+# Package the extension in a .vsix file
 vsce package
 
 # Install the generated .vsix file
@@ -95,7 +95,7 @@ All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the E
 
 ## Requirements
 
-- [Kathará](https://github.com/KatharáFramework/Kathará) installed and available on `PATH`
+- [Kathará](https://github.com/KatharaFramework/Kathara) installed and available on `PATH`
 - VS Code `^1.85.0`
 
 ---
@@ -111,7 +111,7 @@ All commands are available via the Command Palette (`Ctrl+Shift+P`) and in the E
 The extension should work for every OS version of VSCode, command will work if the katharà environment is setup correctly, the development workflow (`npm install`, `npm run build:dev`, `npm run watch`, `npm run compile`) works on  every OS as long as `node`/`npm` are in `PATH`.
 
 ```bash
-git clone https://github.com/antoniocariaa/VSKathará
+git clone https://github.com/antoniocariaa/VSKathara.git
 cd VSKathara
 npm install
 npm run build:dev
@@ -136,7 +136,7 @@ VS Code tasks for all of the above are in `.vscode/tasks.json` (**Terminal → R
 
 ## Lab Format Quick Reference
 
-See the [Kathará Lab Format wiki](https://github.com/KatharáFramework/Kathará/wiki/Kathará-Lab-Format) for the full spec.
+See the [Kathará wiki](https://github.com/KatharaFramework/Kathara/wiki) for the full spec.
 
 **`lab.conf`** — main topology file:
 ```
